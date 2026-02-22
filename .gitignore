@@ -2,3 +2,5 @@
 default.pgo
 tags
 tmp/
+
+*.exe

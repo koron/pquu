@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/koron-go/subcmd"
 )
@@ -22,7 +23,33 @@ func push(ctx context.Context, args []string) error {
 		return err
 	}
 
+	series, err := loadSeries()
+	if err != nil {
+		return err
+	}
 	// TODO:
+	for _, patch := range series {
+		fmt.Printf("Applying patch..%s\n", patch)
+		err := pushPatch(patch)
+		if err != nil {
+			return err
+		}
+	}
 
+	return nil
+}
+
+func pushPatch(patch string) error {
+	files, preamble, err := loadPatch(patch)
+	if err != nil {
+		return err
+	}
+	fmt.Println(patch)
+	for i, f := range files {
+		fmt.Printf("  #%d old=%s new=%s (isnew=%t isdel=%t iscopy=%t isren=%t)\n", i, f.OldName, f.NewName, f.IsNew, f.IsDelete, f.IsCopy, f.IsRename)
+		// TODO: gitdiff.Apply()
+	}
+	// TODO: commit
+	_ = preamble
 	return nil
 }

@@ -1,3 +1,4 @@
+// Package gitapply provides "git apply" feautre.
 package gitapply
 
 import (

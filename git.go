@@ -97,6 +97,9 @@ var patchesDir = sync.OnceValues(func() (string, error) {
 		return filepath.Join(dot, "patches"), nil
 	}
 	root, err := getWorktreeRoot()
+	if err != nil {
+		return "", err
+	}
 	return filepath.EvalSymlinks(filepath.Join(root, dir))
 })
 

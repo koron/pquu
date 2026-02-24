@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
+	"github.com/koron/pquu/internal/gitapply"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/storage/filesystem"
@@ -186,5 +187,5 @@ func loadPatch(name string) (files []*gitdiff.File, preamble string, err error) 
 		return nil, "", err
 	}
 	defer f.Close()
-	return gitdiff.Parse(f)
+	return gitapply.Parse(f)
 }

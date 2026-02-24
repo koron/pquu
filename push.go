@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
+	"github.com/go-git/go-git/v6"
 	"github.com/koron-go/subcmd"
 	"github.com/koron/pquu/internal/gitapply"
 )
@@ -33,9 +34,9 @@ func push(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	for _, patch := range series {
+	for _, patch := range series[:1] {
 		fmt.Printf("Applying patch..%s\n", patch)
-		err := pushPatch(patch, gitapply.ApplyOptions{Reject: force})
+		err := pushPatch(patch, force)
 		if err != nil {
 			return err
 		}
@@ -44,18 +45,23 @@ func push(ctx context.Context, args []string) error {
 	return nil
 }
 
-func pushPatch(patch string, opts gitapply.ApplyOptions) error {
+func pushPatch(patch string, force bool) error {
+	fmt.Println(patch)
 	files, preamble, err := loadPatch(patch)
 	if err != nil {
 		return err
 	}
-	root, err := getWorktreeRoot()
+	wt, err := getWorktree()
 	if err != nil {
 		return err
 	}
-	fmt.Println(patch)
+	root := wt.Filesystem.Root()
 	for i, f := range files {
-		err := pushApply(root, i, f, opts)
+		err := pushApply(root, i, f, force)
+		if err != nil {
+			return err
+		}
+		err = gitAdd(wt, f)
 		if err != nil {
 			return err
 		}
@@ -65,7 +71,7 @@ func pushPatch(patch string, opts gitapply.ApplyOptions) error {
 	return nil
 }
 
-func pushApply(root string, i int, f *gitdiff.File, opts gitapply.ApplyOptions) (err error) {
+func pushApply(root string, i int, f *gitdiff.File, force bool) (err error) {
 	var src io.ReaderAt
 	var file *os.File
 	if !f.IsNew {
@@ -79,7 +85,7 @@ func pushApply(root string, i int, f *gitdiff.File, opts gitapply.ApplyOptions) 
 	}
 
 	var dst bytes.Buffer
-	err = gitapply.Apply(&dst, src, f, opts)
+	err = gitapply.Apply(&dst, src, f, gitapply.ApplyOptions{Reject: force})
 	if err != nil {
 		if rejErr, ok := err.(*gitapply.RejectedError); ok {
 			fmt.Printf("  #%d applied with %d rejects\n", i, len(rejErr.Indices))
@@ -129,6 +135,26 @@ func pushApply(root string, i int, f *gitdiff.File, opts gitapply.ApplyOptions) 
 	}
 	if file != nil {
 		file.Close()
+	}
+	return nil
+}
+
+func gitAdd(wt *git.Worktree, f *gitdiff.File) error {
+	err := wt.AddWithOptions(&git.AddOptions{
+		Path:       f.OldName,
+		SkipStatus: true,
+	})
+	if err != nil {
+		return err
+	}
+	if f.IsRename {
+		err := wt.AddWithOptions(&git.AddOptions{
+			Path:       f.NewName,
+			SkipStatus: true,
+		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -9,9 +9,9 @@ import (
 	"sync"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
-	"github.com/go-git/go-git/v5/storage/filesystem"
+	"github.com/go-git/go-git/v6"
+	"github.com/go-git/go-git/v6/config"
+	"github.com/go-git/go-git/v6/storage/filesystem"
 	"github.com/koron/pquu/internal/gitapply"
 )
 

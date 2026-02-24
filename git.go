@@ -9,10 +9,10 @@ import (
 	"sync"
 
 	"github.com/bluekeyes/go-gitdiff/gitdiff"
-	"github.com/koron/pquu/internal/gitapply"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/storage/filesystem"
+	"github.com/koron/pquu/internal/gitapply"
 )
 
 var getRepo = sync.OnceValues(func() (*git.Repository, error) {
@@ -39,6 +39,14 @@ func getWorktree() (*git.Worktree, error) {
 		return nil, err
 	}
 	return r.Worktree()
+}
+
+func getWorktreeRoot() (string, error) {
+	wt, err := getWorktree()
+	if err != nil {
+		return "", err
+	}
+	return wt.Filesystem.Root(), nil
 }
 
 var ErrNotFilesytemStorage = errors.New("not filesystem storage")
@@ -88,11 +96,7 @@ var patchesDir = sync.OnceValues(func() (string, error) {
 		}
 		return filepath.Join(dot, "patches"), nil
 	}
-	wt, err := getWorktree()
-	if err != nil {
-		return "", err
-	}
-	root := wt.Filesystem.Root()
+	root, err := getWorktreeRoot()
 	return filepath.EvalSymlinks(filepath.Join(root, dir))
 })
 

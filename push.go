@@ -34,7 +34,7 @@ func push(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	for _, patch := range series[:1] {
+	for _, patch := range series {
 		fmt.Printf("Applying patch..%s\n", patch)
 		err := pushPatch(patch, force)
 		if err != nil {
@@ -46,7 +46,6 @@ func push(ctx context.Context, args []string) error {
 }
 
 func pushPatch(patch string, force bool) error {
-	fmt.Println(patch)
 	files, preamble, err := loadPatch(patch)
 	if err != nil {
 		return err
@@ -66,8 +65,10 @@ func pushPatch(patch string, force bool) error {
 			return err
 		}
 	}
-	// TODO: commit
-	_ = preamble
+	_, err = wt.Commit(preamble, &git.CommitOptions{})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

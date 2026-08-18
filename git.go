@@ -46,7 +46,7 @@ func getWorktreeRoot() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return wt.Filesystem.Root(), nil
+	return wt.Filesystem().Root(), nil
 }
 
 var ErrNotFilesytemStorage = errors.New("not filesystem storage")

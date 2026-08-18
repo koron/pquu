@@ -54,7 +54,7 @@ func pushPatch(patch string, force bool) error {
 	if err != nil {
 		return err
 	}
-	root := wt.Filesystem.Root()
+	root := wt.Filesystem().Root()
 	for i, f := range files {
 		err := pushApply(root, i, f, force)
 		if err != nil {

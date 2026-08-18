@@ -354,7 +354,7 @@ func applyPatch(src []byte, f *gitdiff.File, opts ApplyOptions) ([]byte, []int, 
 	if f.IsBinary {
 		if f.BinaryFragment != nil {
 			if f.BinaryFragment.Method == gitdiff.BinaryPatchLiteral {
-				return f.BinaryFragment.Data, nil, nil
+				return f.BinaryFragment.RawData, nil, nil
 			}
 			// For BinaryPatchDelta, we would need to implement Git's binary delta application.
 			// Since it's complex, we'll return an error for now or fallback if possible.
